@@ -39,7 +39,7 @@ print("y_test:", y_test.shape)
 batch_size = Ntr
 
 iterations = 300 # epochs
-lr = 0.01  # learning rate
+lr = 0.019  # learning rate
 lr_decay = 0.999
 reg = 5e-6
 loss_history = []
