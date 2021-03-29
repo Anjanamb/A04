@@ -40,9 +40,9 @@ print("b2:", b2.shape)
 batch_size = 500
 
 iterations = 300 # epochs
-lr = 0.0009 # learning rate
-lr_decay = 0.99999
-reg = 0.004
+lr = 0.015 # learning rate
+lr_decay = 0.999
+reg = 5e-6
 loss_history = []
 train_acc_history = []
 val_acc_history = []
@@ -72,7 +72,7 @@ for t in range(iterations):
     b1 -= lr*db1
     b2 -= lr*db2
     lr *= lr_decay
- 
+
 plt.plot(loss_history)
 plt.xlabel('Epocs')
 plt.ylabel('Loss')
