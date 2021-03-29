@@ -13,7 +13,7 @@ Din = 3072 # CIFAR10
 # Din = 784 # MINIST
 
 # Normalize pixel values
-x_train, x_test = x_train / 255.0, x_test / 255.0
+#x_train, x_test = x_train / 255.0, x_test / 255.0
 mean_image = np.mean(x_train, axis=0)
 x_train = x_train - mean_image
 x_test = x_test - mean_image
@@ -28,7 +28,7 @@ x_train = x_train.astype('float32')
 x_test = x_test.astype('float32')
 
 H = 200
-std = 1e-6
+std = 1e-5
 w1 = std*np.random.randn(Din, H)
 w2 = std*np.random.randn(H, K)
 b1 = np.zeros(H)
@@ -40,14 +40,17 @@ print("b2:", b2.shape)
 batch_size = Ntr
 
 iterations = 300 # epochs
-lr = 1.4e-2 # learning rate
+lr = 0.015 # learning rate
 lr_decay = 0.999
 reg = 5e-6
 loss_history = []
 train_acc_history = []
 val_acc_history = []
-
+#eed = 0
+#rng = np.random.default_rng(seed=seed)
 for t in range(iterations):
+    #batch_indices = np.arange(Ntr)
+    #rng.shuffle(batch_indices)
     batch_indices = np.random.choice(Ntr, batch_size)
     x = x_train[batch_indices]
     y = y_train[batch_indices]
@@ -56,7 +59,7 @@ for t in range(iterations):
     loss = 1./batch_size*np.square(y_pred - y).sum() + reg * (np.sum(w2 * w2) + np.sum(w1 * w1))
     loss_history.append(loss)
     if t % 10 == 0:
-        print('Iteration %d / %d: loss %f' % (t, iterations, loss))
+      print('Iteration %d / %d: loss %f' % (t, iterations, loss))
 
     dy_pred = 1./batch_size*2.0*(y_pred -y) # partial derivative of L w.r.t y_hat backward
     dw2 = h.T.dot(dy_pred) + reg*w2
@@ -69,10 +72,11 @@ for t in range(iterations):
     b1 -= lr*db1
     b2 -= lr*db2
     lr *= lr_decay
+    
 
 plt.plot(loss_history)
 plt.xlabel('Epocs')
-plt.ylabel('Error')
+plt.ylabel('Loss')
 f, axarr = plt.subplots(1,10)
 f.set_size_inches(16, 6)
 
@@ -82,18 +86,22 @@ for i in range(10):
     axarr[i].imshow(img*1000)
 plt.show()
 
-x_t = x_train
-print("x_train ->", x_t.shape)
-h = 1.0/(1.0 + np.exp(-(x_t.dot(w1) + b1))) #sigmoid
+x_tr = x_train
+print("x_train ->", x_tr.shape)
+h = 1.0/(1.0 + np.exp(-(x_tr.dot(w1) + b1))) #sigmoid
 y_pred = h.dot(w2) + b2
 
-tacc = 1.0 -1/Ntr*(np.abs(np.argmax(y_train,axis=1) - np.argmax(y_pred, axis=1))).sum()
-print("train_acc = ", tacc)
+tr_acc = 1.0 -1/(Ntr*9)*(np.abs(np.argmax(y_train,axis=1) - np.argmax(y_pred, axis=1))).sum()
+tr_loss = 1./Ntr*np.square(y_pred-y_train).sum() + reg * (np.sum(w2 * w2) + np.sum(w1 * w1))
+print("train_acc = ", tr_acc)
+print("train_loss = ", tr_loss)
 
-x_t = x_test
-print("x_test ->", x_t.shape)
-h = 1.0/(1.0 + np.exp(-(x_t.dot(w1) + b1))) #sigmoid
+x_ts = x_test
+print("x_test ->", x_ts.shape)
+h = 1.0/(1.0 + np.exp(-(x_ts.dot(w1) + b1))) #sigmoid
 y_pred= h.dot(w2) + b2
 
-tacc = 1.0 - 1/Nte*(np.abs(np.argmax(y_test,axis=1) - np.argmax(y_pred, axis=1))).sum()
-print("test_acc = ", tacc)
+ts_acc = 1.0 - 1/(Nte*9)*(np.abs(np.argmax(y_test,axis=1) - np.argmax(y_pred, axis=1))).sum()
+ts_loss = 1./Nte*np.square(y_pred-y_test).sum() + reg * (np.sum(w2 * w2) + np.sum(w1 * w1))
+print("test_acc = ", ts_acc)
+print("test_loss = ", ts_loss)
