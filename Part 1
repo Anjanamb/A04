@@ -21,6 +21,7 @@ x_test = x_test - mean_image
 y_train = tf.keras.utils.to_categorical(y_train, num_classes=K)
 y_test = tf.keras.utils.to_categorical(y_test, num_classes=K)
 
+# Transform images from (width, width, 3) to 3072-dimensional vectors (width*width*3)
 x_train = np.reshape(x_train,(Ntr,Din))
 x_test = np.reshape(x_test,(Nte,Din))
 x_train = x_train.astype('float32')
@@ -38,7 +39,7 @@ print("y_test:", y_test.shape)
 batch_size = Ntr
 
 iterations = 300 # epochs
-lr = 1.4e-2  # learning rate
+lr = 0.01  # learning rate
 lr_decay = 0.999
 reg = 5e-6
 loss_history = []
@@ -64,7 +65,8 @@ for t in range(iterations):
     w1 -= lr*dw1
     b1 -= lr*db1
     lr *= lr_decay
-
+    
+    
 # Printing accuracies and displaying w as images
 plt.plot(loss_history)
 plt.xlabel('Epocs')
@@ -83,11 +85,15 @@ print("x_train ->", x_t.shape)
 y_pred = x_t.dot(w1) + b1
 
 tacc = 1.0 -1/(Ntr*9)*(np.abs(np.argmax(y_train, axis=1) - np.argmax(y_pred, axis=1))).sum()
+tr_loss = 1./Ntr*np.square(y_pred-y_train).sum() + reg * (np.sum(w1 * w1))
 print("train_acc = ", tacc)
+print("train_loss = ", tr_loss)
 
 x_t = x_test
 print("x_test ->", x_t.shape)
 y_pred= x_t.dot(w1) + b1
 
 tacc = 1.0 - 1/(Nte*9)*(np.abs(np.argmax(y_test, axis=1) - np.argmax(y_pred, axis=1))).sum()
+ts_loss = 1./Nte*np.square(y_pred-y_test).sum() + reg * (np.sum(w1 * w1))
 print("test_acc = ", tacc)
+print("test_loss = ", ts_loss)
