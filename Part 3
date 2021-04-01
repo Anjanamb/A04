@@ -40,25 +40,27 @@ print("b2:", b2.shape)
 batch_size = 500
 
 iterations = 300 # epochs
-lr = 0.015 # learning rate
+lr = 0.0001 # learning rate
 lr_decay = 0.999
 reg = 5e-6
 loss_history = []
 train_acc_history = []
 val_acc_history = []
-#seed = 0
-#rng = np.random.default_rng(seed=seed)
 for t in range(iterations):
-    #batch_indices = np.arange(batch_size)
-    #rng.shuffle(batch_indices)
-    batch_indices = np.random.choice(Ntr, batch_size)
+  # Split the Ntr into arrays of size 500
+  indices = []
+  for s in range(int(Ntr/batch_size)):
+    Ntr_samp = np.arange(s*batch_size, s*batch_size + batch_size)
+    indices.append(Ntr_samp)
+
+  for batch_indices in indices:
     x = x_train[batch_indices]
     y = y_train[batch_indices]
     h = 1.0/(1.0 + np.exp(-(x.dot(w1) + b1)))
     y_pred = h.dot(w2) +b2
     loss = 1./batch_size*np.square(y_pred - y).sum() + reg * (np.sum(w2 * w2) + np.sum(w1 * w1))
     loss_history.append(loss)
-    if t % 10 == 0:
+    if t % 100 == 0:
       print('Iteration %d / %d: loss %f' % (t, iterations, loss))
 
     dy_pred = 1./batch_size*2.0*(y_pred -y) # partial derivative of L w.r.t y_hat backward
